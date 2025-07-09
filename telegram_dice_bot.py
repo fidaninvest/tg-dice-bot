@@ -1,16 +1,19 @@
-import os
-import random
-from aiogram import Bot, Dispatcher, types
+
+
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardRemove
-from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+import asyncio
+import random
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = "7716257236:AAHUSNHr2YZhydBRjN5AGFovoQVlTTnE_48"
 
-# Эмодзи для кубиков
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
 DICE_NUMS = {
     1: "1️⃣",
     2: "2️⃣",
@@ -20,34 +23,31 @@ DICE_NUMS = {
     6: "6️⃣"
 }
 
-# Новый способ — через DefaultBotProperties!
-bot = Bot(
-    token=TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
-)
-dp = Dispatcher()
+inline_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="🎲 Бросить кости", callback_data="roll")]
+])
 
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    await message.answer(
-        "🎯 Напиши /roll чтобы бросить 2 кости!",
-        reply_markup=ReplyKeyboardRemove()
-    )
+async def start(message: types.Message):
+    await message.answer("Жми кнопку ниже, чтобы бросить кости!", reply_markup=inline_kb)
 
-@dp.message(Command("roll"))
-async def cmd_roll(message: types.Message):
+@dp.callback_query(F.data == "roll")
+async def roll_callback(callback: types.CallbackQuery):
     d1 = random.randint(1, 6)
     d2 = random.randint(1, 6)
     total = d1 + d2
 
     text = (
-        f"🎲 *Кидаем кости!*\n\n"
+        f"🎯 <b>Кидаем кости!</b>\n\n"
         f"🟢 Первая: {DICE_NUMS[d1]}\n"
         f"🔵 Вторая: {DICE_NUMS[d2]}\n\n"
-        f"🎉 *Результат: {total}* 🎉"
+        f"🎉 <b>Результат: {total}</b> 🎉"
     )
-    await message.answer(text, reply_markup=ReplyKeyboardRemove())
+    await callback.message.answer(text, reply_markup=inline_kb, parse_mode="HTML")
+    await callback.answer()
+
+async def main():
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(dp.start_polling(bot))
+    asyncio.run(main())
