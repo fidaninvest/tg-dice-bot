@@ -8,7 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "7716257236:AAHUSNHr2YZhydBRjN5AGFovoQVlTTnE_48"
 
 # Эмодзи для кубиков
 DICE_NUMS = {
