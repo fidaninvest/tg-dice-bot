@@ -1,9 +1,11 @@
 import random
+import os
+
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # ✅ Токен
-TOKEN = "7716257236:AAHUSNHr2YZhydBRjN5AGFovoQVlTTnE_48"
+TOKEN = os.getenv("TOKEN")
 
 # Цифры в синем кружке (emoji)
 DICE_NUMS = {
