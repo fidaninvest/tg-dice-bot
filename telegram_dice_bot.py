@@ -1,17 +1,16 @@
-import random
 import os
-from dotenv import load_dotenv  # 🆕 добавили dotenv
+import random
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardRemove
+from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
+from dotenv import load_dotenv
 
-from telegram import Update, ReplyKeyboardRemove
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
-# 📥 Загружаем переменные из .env
 load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 
-# ✅ Получаем токен из переменной окружения
-TOKEN = os.getenv("TOKEN")
-
-# Цифры в синем кружке (emoji)
+# Эмодзи для кубиков
 DICE_NUMS = {
     1: "1️⃣",
     2: "2️⃣",
@@ -21,29 +20,34 @@ DICE_NUMS = {
     6: "6️⃣"
 }
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
+# Новый способ — через DefaultBotProperties!
+bot = Bot(
+    token=TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN)
+)
+dp = Dispatcher()
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await message.answer(
         "🎯 Напиши /roll чтобы бросить 2 кости!",
         reply_markup=ReplyKeyboardRemove()
     )
 
-async def roll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@dp.message(Command("roll"))
+async def cmd_roll(message: types.Message):
     d1 = random.randint(1, 6)
     d2 = random.randint(1, 6)
     total = d1 + d2
 
     text = (
-        f"🎯 *Кидаем кости!*\n\n"
+        f"🎲 *Кидаем кости!*\n\n"
         f"🟢 Первая: {DICE_NUMS[d1]}\n"
         f"🔵 Вторая: {DICE_NUMS[d2]}\n\n"
         f"🎉 *Результат: {total}* 🎉"
     )
-    await update.message.reply_text(text, parse_mode="Markdown")
+    await message.answer(text, reply_markup=ReplyKeyboardRemove())
 
-# 🔄 Запуск
 if __name__ == "__main__":
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("roll", roll))
-    print("✅ Бот запущен.")
-    app.run_polling()
+    import asyncio
+    asyncio.run(dp.start_polling(bot))
