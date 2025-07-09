@@ -1,10 +1,14 @@
 import random
 import os
+from dotenv import load_dotenv  # 🆕 добавили dotenv
 
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# ✅ Токен
+# 📥 Загружаем переменные из .env
+load_dotenv()
+
+# ✅ Получаем токен из переменной окружения
 TOKEN = os.getenv("TOKEN")
 
 # Цифры в синем кружке (emoji)
